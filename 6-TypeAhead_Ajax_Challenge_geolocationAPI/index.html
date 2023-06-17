@@ -68,16 +68,19 @@
           place.distance = distance;
         });
 
-        // Sort the results by distance
+        // Sort the results by distance .. alternate-1
         matchArray.sort((a, b) => {
           if (a.distance === null) {
-            return 1; // Put cities with unknown distance at the end
+            return 1; 
           }
           if (b.distance === null) {
-            return -1; // Put cities with unknown distance at the end
+            return -1;
           }
           return a.distance - b.distance;
         });
+
+        // Sort the results by distance.. alternate-2
+        // matchArray.sort((a, b) => (a.distance === null || b.distance === null) ? (b.distance === null ? -1 : 1) : a.distance - b.distance);
 
         const html = matchArray
           .map((place) => {
