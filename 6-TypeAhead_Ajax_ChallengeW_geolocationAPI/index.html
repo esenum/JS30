@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="https://fav.farm/🔥" />
+  </head>
+  <body>
+    <form class="search-form">
+      <input type="text" class="search" placeholder="City or State" />
+      <ul class="suggestions">
+        <li>Filter for a city</li>
+        <li>or a state</li>
+      </ul>
+    </form>
+    <script>
+      //challenge: To find the closest location to the person who is being searched with GeolocationAPI
+     
+      
+      const endpoint =
+        "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+
+     
+      
+      const cities = [];
+
+     
+      fetch(endpoint)
+        .then((blob) => blob.json())
+        .then((data) => cities.push(...data)); 
+
+      //step1- define user location to null
+
+      let userLocation = null;
+      //step2- get the user location using geolocation API
+
+      navigator.geolocation.getCurrentPosition(
+      function(position) {
+        userLocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+      },
+      function(error) {
+        console.error('Error getting user location:', error);
+      }
+      );
+
+      //step3- calculate the distance using formula
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Distance in km
+        return distance;
+      }
+
+      //step4- convert degrees to radian
+      function deg2rad(deg) {
+      return deg * (Math.PI / 180);
+      }
+     
+      function findMatches(wordToMatch, cities) {
+        return cities.filter((place) => {
+          const regex = new RegExp(wordToMatch, "gi");
+          return place.city.match(regex) || place.state.match(regex);
+        });
+      }
+
+      
+      function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // step5- modify the displayMatch function to include distance calculation
+      function displayMatch() {
+        const matchArray = findMatches(this.value, cities);
+        const html = matchArray
+          .map((place) => {
+           
+            const regex = new RegExp(this.value, "gi");
+            const cityName = place.city.replace(regex,`<span class="hl">${this.value}</span>`);
+            const stateName = place.state.replace(regex,`<span class="hl">${this.value}</span>`);
+
+            // calculate the distance between the city and the user's location
+            const distance = userLocation ? calculateDistance(userLocation.latitude, userLocation.longitude, place.latitude, place.longitude) : null;
+
+            return `
+              <li>
+              <span class="name">${cityName}, ${stateName}</span>
+              <span class="population">${numberWithCommas(place.population)}</span>
+               ${distance ? `<span class="distance">${distance.toFixed(2)} km</span>` : ''}
+              </li>
+              `;
+          }).join("");
+
+        suggestions.innerHTML = html;
+      }
+
+    
+
+      const inputSearch = document.querySelector(".search");
+      const suggestions = document.querySelector(".suggestions");
+
+    
+
+      inputSearch.addEventListener("change", displayMatch);
+      inputSearch.addEventListener("keyup", displayMatch);
+
+      
+    </script>
+  </body>
+</html>
