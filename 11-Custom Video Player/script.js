@@ -63,6 +63,11 @@ function handleKeydown(event) {
     handleSize();
   }
 }
+function togglePlaySpaceBar(e){
+  if(e.keyCode===32){
+    togglePlay();
+  }
+}
 
 /* Hook up the event listeners */
 video.addEventListener('click',togglePlay);
@@ -82,5 +87,8 @@ progress.addEventListener('mouseup',()=>mousedown=false);
 
 
 //challenge will be fullscreen with click and f key
+//and space bar to play and stop
+
 sizeArrange.addEventListener('click',handleSize);
 document.addEventListener('keydown', handleKeydown);
+document.addEventListener('keydown', togglePlaySpaceBar);
